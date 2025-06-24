@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Option Price Heatmap</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h2>Black-Scholes Option Pricing Heatmap</h2>
+
+    <form id="params">
+        <div class="form-group">
+            Spot: <input type="number" step="any" id="spot" value="100">
+            Volatility: <input type="number" step="any" id="volatility" value="0.2">
+            Rate: <input type="number" step="any" id="rate" value="0.01">
+            Type: 
+            <select id="type">
+                <option value="call">Call</option>
+                <option value="put">Put</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            Strike Low: <input type="number" step="any" id="strike_low" value="80">
+            High: <input type="number" step="any" id="strike_high" value="120">
+            Step: <input type="number" step="any" id="strike_step" value="1">
+        </div>
+
+        <div class="form-group">
+            Maturity Low: <input type="number" step="any" id="maturity_low" value="0.05">
+            High: <input type="number" step="any" id="maturity_high" value="1.0">
+            Step: <input type="number" step="any" id="maturity_step" value="20">
+        </div>
+
+        <div class="form-group full-width">
+            <button type="submit">Update</button>
+        </div>
+    </form>
+
+    <div id="greek-info" style="margin-top: 20px; font-family: monospace;"></div>
+
+    <div id="heatmap" style="width: 80vw; height: 80vh;"></div>
+
+    <script>
+        async function fetchAndPlot(event) {
+            event.preventDefault();
+            const payload = {
+                spot: document.getElementById('spot').value,
+                volatility: document.getElementById('volatility').value,
+                rate: document.getElementById('rate').value,
+                type: document.getElementById('type').value,
+                strike_low: document.getElementById('strike_low').value,
+                strike_high: document.getElementById('strike_high').value,
+                strike_step: document.getElementById('strike_step').value,
+                maturity_low: document.getElementById('maturity_low').value,
+                maturity_high: document.getElementById('maturity_high').value,
+                maturity_step: document.getElementById('maturity_step').value
+            };
+            const res = await fetch('/heatmap_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            Plotly.newPlot('heatmap', [{
+                z: data.z,
+                x: data.x,
+                y: data.y,
+                type: 'heatmap',
+                colorscale: [
+                    [0.0, 'white'],
+                    [0.5, 'red'],   // Neutral center
+                    [1.0, 'green']
+                ],
+                zmid: 0,
+                hovertemplate: 'Strike: %{x}<br>Time: %{y}<br>Price: %{z:.2f}<extra></extra>'
+            }], {
+                title: 'Option Prices Heatmap',
+                xaxis: { title: 'Strike Price' },
+                yaxis: { title: 'Time to Maturity (Years)' }
+            });
+
+            document.getElementById('greek-info').innerHTML = `
+                <strong>Greeks at ATM (Strike: ${data.atm_strike}, Maturity: ${data.shortest_maturity})</strong><br>
+                Δ Delta: ${data.greeks.delta.toFixed(4)} |
+                Γ Gamma: ${data.greeks.gamma.toFixed(4)} |
+                ν Vega: ${data.greeks.vega.toFixed(2)} |
+                Θ Theta: ${data.greeks.theta.toFixed(2)} |
+                ρ Rho: ${data.greeks.rho.toFixed(2)}
+            `;
+        }
+        
+        document.getElementById('params').addEventListener('submit', fetchAndPlot);
+        fetchAndPlot(new Event('submit'));
+        
+    </script>
+</body>
+</html>
