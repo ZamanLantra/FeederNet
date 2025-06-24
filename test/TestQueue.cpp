@@ -1,6 +1,6 @@
-// g++ -std=c++20 TestQueue.cpp -o TestQueue -O3 -DQUEUE_CAPACITY=2048
+// g++ -std=c++20 TestQueue.cpp -o TestQueue -I../include -O3 -DQUEUE_CAPACITY=2048
 
-#include "../Queue.hpp"
+#include "Queue.hpp"
 
 template <typename Q>
 void testQueue(const std::string& queueType) {
@@ -32,5 +32,7 @@ int main() {
     testQueue<CustomSPSCLockFreeQueue<double*>>("CustomSPSCLockFreeQueue");
     testQueue<CustomMPMCLockFreeQueue<double*>>("CustomMPMCLockFreeQueue");
     testQueue<BoostLockFreeQueue<double*>>("BoostLockFreeQueue");
+#ifdef USE_MOODYCAMEL_QUEUE
     testQueue<MoodycamelLockFreeQueue<double*>>("MoodycamelLockFreeQueue");
+#endif
 }

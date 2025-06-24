@@ -1,5 +1,3 @@
-// g++ -std=c++20 ITCHTradeReceiver.cpp -o ITCHTradeReceiver -I../ -DPOOL_MSG_COUNT=400000
-
 #include <thread>
 #include <chrono>
 #include <functional>
@@ -279,51 +277,3 @@ private:
     Socket socketFD_{-1};
     alignas(64) std::atomic<bool> runFlag_{true};
 };
-
-/**************************************************************************/
-int main() {
-    std::ofstream file("log_ITCHTradeReceiver.txt"); 
-    AsyncLogger logger(file); // Can use std::cout instead of file
-
-    logger.log("Main Start\n");
-
-    using MsgPool = LockFreeThreadSafePool<ITCHTradeMsg, true>;
-    using TradeReceiverToSequencerQ = CustomSPSCLockFreeQueue<ITCHTradeMsg*>;
-    using SequencerToXQ = CustomSPSCLockFreeQueue<ITCHTradeMsg*>; // can use CustomMPMCLockFreeQueue as well
-
-    using TradeDataSequencerT = TradeDataSequencer<ITCHTradeMsg, TradeReceiverToSequencerQ, 
-                                            SequencerToXQ, MsgPool>;
-    using MulticastTradeDataReceiverT = MulticastTradeDataReceiver<ITCHTradeMsg, 
-                                            TradeReceiverToSequencerQ, MsgPool>;
-
-    TradeReceiverToSequencerQ tradeReceiverToSequencerQ;
-    SequencerToXQ sendQ;
-    MsgPool msgPool;
-
-    MulticastTradeDataReceiverT multicastTradeReceiver(tradeReceiverToSequencerQ, msgPool, logger);
-    TradeDataSequencerT tradeSequencer(tradeReceiverToSequencerQ, sendQ, msgPool, logger);
-    
-    multicastTradeReceiver.connect();
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // Check for readiness using a different method, login msg?
-
-    logger.log("Starting Threads for TradeDataSequencer and MulticastTradeDataReceiver\n");
-
-    std::vector<std::thread> threads {};
-
-    try {
-        threads.emplace_back(&TradeDataSequencerT::run, &tradeSequencer);
-        threads.emplace_back(&MulticastTradeDataReceiverT::run, &multicastTradeReceiver);
-    } catch (const std::exception& ex) {
-        std::cerr << "Exception in Spawning Threads: " << ex.what() << "\n";
-    }
-
-    std::this_thread::sleep_for(std::chrono::seconds(10));
-    logger.log("Stopping Threads for TradeDataSequencer and MulticastTradeDataReceiver\n");
-    tradeSequencer.stop();
-    multicastTradeReceiver.stop();
- 
-    for (auto& thr : threads) 
-        thr.join();
-    
-    logger.log("Main End\n");
-}

@@ -8,7 +8,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <boost/lockfree/queue.hpp>
-#include "moodycamel/concurrentqueue.h"
+
+#define USE_MOODYCAMEL_QUEUE
 
 namespace Const {
 #ifndef QUEUE_CAPACITY
@@ -206,6 +207,8 @@ private:
         boost::lockfree::fixed_sized<true>> queue_;
 };
 
+#ifdef USE_MOODYCAMEL_QUEUE
+#include "moodycamel/concurrentqueue.h"
 /**************************************************************************/
 template <MsgPtr T>
 class MoodycamelLockFreeQueue {
@@ -225,5 +228,6 @@ public:
 private:
     moodycamel::ConcurrentQueue<T> queue_;
 };
+#endif
 
 /**************************************************************************/

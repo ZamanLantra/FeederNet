@@ -1,9 +1,9 @@
 /*
-$ g++ -std=c++20 -O3 -o TestOrderBook TestOrderBook.cpp
+$ g++ -std=c++20 -O3 -o TestOrderBook TestOrderBook.cpp -I../include
 $ numactl --physcpubind=4 ./TestOrderBook
 */
 
-#include "../OrderBook.hpp"
+#include "OrderBook.hpp"
 
 void benchmark_orderbook() {
     using namespace std::chrono;

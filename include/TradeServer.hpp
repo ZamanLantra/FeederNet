@@ -1,5 +1,3 @@
-// g++ -std=c++20 ITCHTickerServer.cpp -o ITCHTickerServer -I../
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -16,8 +14,6 @@
 #include "ITCHMessages.hpp"
 
 namespace Config {
-    const std::string tradeFilePath = "../YahooFinance/ETHUSDC-trades-2025-06-20.csv";
-
     constexpr std::string multicastIP = "239.255.0.1";
     constexpr int multicastPort = 30001;
     constexpr int multicastThrottle_us = 0;
@@ -274,16 +270,16 @@ private:
 };
 
 /**************************************************************************/
-class TickerServer {
+class TradeServer {
 public:
-    TickerServer(const std::string& tradeFile, bool needSnapshotServer) 
+    TradeServer(const std::string& tradeFile, bool needSnapshotServer) 
             : tradeMsgStore_(tradeFile)
             , snapshotServer_(tradeMsgStore_)
             , multicastServer_(tradeMsgStore_)
             , needSnapshotServer_(needSnapshotServer) {
 
     }
-    ~TickerServer() {
+    ~TradeServer() {
         for (auto& thr : serverThreads_) 
             thr.join();
     }
@@ -301,9 +297,3 @@ private:
     std::vector<std::thread> serverThreads_;  
     bool needSnapshotServer_ = false;
 };
-
-/**************************************************************************/
-int main() {
-    TickerServer tickerServer(Config::tradeFilePath, true);
-    tickerServer.run();
-}

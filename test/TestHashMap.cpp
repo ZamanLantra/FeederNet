@@ -1,6 +1,6 @@
-// g++ -std=c++20 TestHashMap.cpp -o TestHashMap -O3 -DHASH_BUCKETS=32
+// g++ -std=c++20 TestHashMap.cpp -o TestHashMap -O3 -I../include -DHASH_BUCKETS=32
 
-#include "../HashMap.hpp"
+#include "HashMap.hpp"
 
 /**************************************************************************/
 template <typename HM>
