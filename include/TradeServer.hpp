@@ -11,7 +11,7 @@
 #include <thread>
 #include <chrono>
 #include "Socket.hpp"
-#include "ITCHMessages.hpp"
+#include "Messages.hpp"
 
 namespace Config {
     constexpr std::string multicastIP = "239.255.0.1";
@@ -179,11 +179,11 @@ private:
                         epoll_ctl(epollFD_.get(), EPOLL_CTL_DEL, fd, nullptr);
                         ::close(fd);
                     } 
-                    else if (valread != sizeof(ITCHGapRequestMsg)) {
+                    else if (valread != sizeof(GapRequestMsg)) {
                         std::cout << "Received unknown message at SnapshotServer\n";
                     }
                     else {
-                        ITCHGapRequestMsgPtr msg = reinterpret_cast<ITCHGapRequestMsgPtr>(buffer.data());
+                        GapRequestMsgPtr msg = reinterpret_cast<GapRequestMsgPtr>(buffer.data());
                         
                         switch (msg->type) {
                             case '0':
@@ -199,7 +199,7 @@ private:
         }
     }
 
-    void serveGapRequest(ITCHGapRequestMsgPtr msg, int fd) {
+    void serveGapRequest(GapRequestMsgPtr msg, int fd) {
         std::cout << "serveGapRequest start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
         if (msg->start_seq > msg->end_seq || msg->start_seq < 0 || msg->end_seq >= tradeMsgStore_.size()) {
             std::cerr << "Requested invalid gap start:" << msg->start_seq << " end:" << msg->end_seq 
@@ -210,7 +210,7 @@ private:
         }
     }
 
-    void replayAll(ITCHGapRequestMsgPtr msg, int fd) {
+    void replayAll(GapRequestMsgPtr msg, int fd) {
         std::cout << "replayAll start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
         for (int i = 0; i < tradeMsgStore_.size(); ++i) {
             send(fd, (void*)tradeMsgStore_.get(i), ITCHTradeMsgSize, 0);

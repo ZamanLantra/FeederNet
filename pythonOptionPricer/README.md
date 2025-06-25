@@ -1,11 +1,12 @@
 # OptionPricer -- Python Flask
 
 Black sholes equation based Option Pricer. 
-This produces a heatmap for the configurations `Spot Price`, `Volatility`, `Rate`, `Type (Call/Put)` for the `Strke` and `Maturity` ranges configured. 
+This produces a heatmap for the configurations `Spot Price`, `Volatility`, `Rate`, `Type (Call/Put)` for the `Strike` and `Maturity` ranges configured. 
+In addition, it calculates the Greek `Values`, `Delta`, `Gamma`, `Vega`, `Theta` and `Rho`
 
 ## Idea
 
-Use Warwick CS139 - Web Development Technologies techniques to host a web server using flask and plot the heatmap through javascript (using Plotly).
+Use Warwick `CS139 - Web Development Technologies techniques` to host a web server using flask and plot the heatmap through javascript (using Plotly).
 
 ## Getting Started
 

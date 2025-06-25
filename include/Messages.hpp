@@ -12,7 +12,7 @@ struct ITCHTradeMsg {
     bool best_match;            // flags
 };
 
-struct ITCHGapRequestMsg {
+struct GapRequestMsg {
     char type;                  // '0' for Gap Request and '1' for replay
     uint64_t start_seq;
     uint64_t end_seq;
@@ -20,7 +20,7 @@ struct ITCHGapRequestMsg {
 #pragma pack(pop)
 
 using ITCHTradeMsgPtr = ITCHTradeMsg*;
-using ITCHGapRequestMsgPtr = ITCHGapRequestMsg*;
+using GapRequestMsgPtr = GapRequestMsg*;
 
 constexpr size_t ITCHTradeMsgSize = sizeof(ITCHTradeMsg);
-constexpr size_t ITCHGapRequestMsgSize = sizeof(ITCHGapRequestMsg);
+constexpr size_t GapRequestMsgSize = sizeof(GapRequestMsg);

@@ -8,7 +8,7 @@
 #include "HashMap.hpp"
 #include "MemoryPool.hpp"
 #include "AsyncLogger.hpp"
-#include "ITCHMessages.hpp"
+#include "Messages.hpp"
 
 namespace Config {
     constexpr bool debug = true;
@@ -71,7 +71,7 @@ private:
     void sendRecoveryRequest(const uint64_t startSeq, const uint64_t endSeq) {
         if constexpr (Config::debug) 
             logger_.log("sendRecoveryRequest start:%llu end %llu\n", startSeq, endSeq);
-        ITCHGapRequestMsg req{'0', startSeq, endSeq};
+        GapRequestMsg req{'0', startSeq, endSeq};
         ssize_t sent = send(socketFD_.get(), &req, sizeof(req), 0);
         if (sent != sizeof(req)) [[unlikely]]
             throw std::runtime_error("Failed to send full recovery request at sendRecoveryRequest");
