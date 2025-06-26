@@ -51,9 +51,9 @@ void testMemoryPool(const std::string& poolType) {
     auto duration_allocate = duration_cast<milliseconds>(end_allocate - start_allocate).count();
     auto duration_deallocate = duration_cast<milliseconds>(end_deallocate - start_deallocate).count();
     
-    std::cout << "\t🟢 Allocate Time: " << duration_allocate << " ms " << 
+    std::cout << "\tAllocate Time: " << duration_allocate << " ms " << 
         (((double)duration_allocate / Const::poolMsgCount) * 1'000'000) << " ns/op\n";
-    std::cout << "\t🔴 Deallocate Time: " << duration_deallocate << "ms " << 
+    std::cout << "\tDeallocate Time: " << duration_deallocate << "ms " << 
         (((double)duration_deallocate / Const::poolMsgCount) * 1'000'000)<< " ns/op\n";
 }
 
@@ -113,12 +113,12 @@ void concurrentPoolTest(const std::string& poolType, size_t numThreads, bool ver
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-    std::cout << "\t🟢 Test completed in " << elapsed_ms << " ms.\n";
+    std::cout << "\tTest completed in " << elapsed_ms << " ms.\n";
     if (verify) {
         if (!errorDetected) {
-            std::cout << "\t🟢 No data corruption detected. Pool is thread-safe under test.\n";
+            std::cout << "\tNo data corruption detected. Pool is thread-safe under test.\n";
         } else {
-            std::cout << "\t🔴 Data corruption detected! Pool is NOT thread-safe.\n";
+            std::cout << "\tData corruption detected! Pool is NOT thread-safe.\n";
         }
     }
 }
@@ -142,23 +142,23 @@ int main() {
 /*
 Testing with BoostPool<Msg, false>using count: 100000...
 BoostPool initialized for type: 3Msg
-	🟢 Allocate Time: 4 ms 40 ns/op
-	🔴 Deallocate Time: 7738ms 77380 ns/op
+	Allocate Time: 4 ms 40 ns/op
+	Deallocate Time: 7738ms 77380 ns/op
 Testing with CustomLockedPool<Msg, false>using count: 100000...
 CustomLockedPool initialized for type: 3Msg
-	🟢 Allocate Time: 0 ms 0 ns/op
-	🔴 Deallocate Time: 0ms 0 ns/op
+	Allocate Time: 0 ms 0 ns/op
+	Deallocate Time: 0ms 0 ns/op
 Testing with CustomLockFreePool<Msg, false>using count: 100000...
 CustomLockFreePool initialized for type: 3Msg
 Warning: CustomLockFreePool is thread-safe always
-	🟢 Allocate Time: 1 ms 10 ns/op
-	🔴 Deallocate Time: 1ms 10 ns/op
+	Allocate Time: 1 ms 10 ns/op
+	Deallocate Time: 1ms 10 ns/op
 BoostPool initialized for type: 3Msg
 
 Running concurrent test with 10 threads, 10000 messages per thread with BoostPool<Msg, true>using count: 100000...
-	🟢 Test completed in 15357 ms.
-	🟢 No data corruption detected. Pool is thread-safe under test.
+	Test completed in 15357 ms.
+	No data corruption detected. Pool is thread-safe under test.
 Running concurrent test with 10 threads, 10000 messages per thread with LockFreeThreadSafePool<Msg, true>using count: 100000...
-	🟢 Test completed in 32 ms.
-	🟢 No data corruption detected. Pool is thread-safe under test.
+	Test completed in 32 ms.
+	No data corruption detected. Pool is thread-safe under test.
 */

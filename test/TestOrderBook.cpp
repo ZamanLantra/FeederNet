@@ -8,7 +8,7 @@ $ numactl --physcpubind=4 ./TestOrderBook
 void benchmark_orderbook() {
     using namespace std::chrono;
 
-    std::cout << "🚀 Benchmarking OrderBook with " << Const::NumOrders << " orders\n";
+    std::cout << "Benchmarking OrderBook with " << Const::NumOrders << " orders\n";
 
     OrderBook<false> book;
     std::vector<Order> orders;
@@ -26,7 +26,7 @@ void benchmark_orderbook() {
         o.price = price_dist(rng);
         o.quantity = qty_dist(rng);
         o.is_buy = side_dist(rng);
-        orders.push_back(o);
+        orders.emplace_back(o);
     }
 
     // Benchmark insert
@@ -62,13 +62,13 @@ void benchmark_orderbook() {
     auto duration_update = duration_cast<milliseconds>(end_update - start_update).count();
     auto duration_cancel = duration_cast<milliseconds>(end_cancel - start_cancel).count();
 
-    std::cout << "🟢 Insert Time: " << duration_insert << " ms → "
+    std::cout << "Insert Time: " << duration_insert << " ms → "
               << (Const::NumOrders * 1000.0 / duration_insert) << " ops/sec\n";
 
-    std::cout << "🟡 Update Time: " << duration_update << " ms → "
+    std::cout << "Update Time: " << duration_update << " ms → "
               << (Const::NumOrders * 1000.0 / duration_update) << " ops/sec\n";
 
-    std::cout << "🔴 Cancel Time: " << duration_cancel << " ms → "
+    std::cout << "Cancel Time: " << duration_cancel << " ms → "
               << (Const::NumOrders * 1000.0 / duration_cancel) << " ops/sec\n";
 
     auto best_bid = book.bestBid();
@@ -77,7 +77,7 @@ void benchmark_orderbook() {
     std::cout << "Best Ask: " << best_ask.first << " Size: " << best_ask.second << "\n";
     assert(best_bid.second == 0 && best_ask.second == 0);
 
-    std::cout << "✅ Top-of-book empty after all cancels.\n";
+    std::cout << "Top-of-book empty after all cancels.\n";
 }
 
 int main() {
@@ -115,27 +115,27 @@ int main() {
 /*
 1 << 20 = 1048576 HashMap bucket size
 
-🚀 Benchmarking OrderBook with 1000000 orders
+Benchmarking OrderBook with 1000000 orders
 ChainingHashMap initialized 
-    🟢 Insert Time: 35 ms → 2.85714e+07 ops/sec | 35 ns/op
-    🟡 Update Time: 18 ms → 5.55556e+07 ops/sec | 18 ns/op
-    🔴 Cancel Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
+    Insert Time: 35 ms → 2.85714e+07 ops/sec | 35 ns/op
+    Update Time: 18 ms → 5.55556e+07 ops/sec | 18 ns/op
+    Cancel Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
 
-🚀 Benchmarking OrderBook with 1000000 orders
+Benchmarking OrderBook with 1000000 orders
 FixedSizedChainingHashMap initialized 
-    🟢 Insert Time: 16 ms → 6.25e+07 ops/sec.   | 16 ns/op
-    🟡 Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
-    🔴 Cancel Time: 17 ms → 5.88235e+07 ops/sec | 17 ns/op
+    Insert Time: 16 ms → 6.25e+07 ops/sec.   | 16 ns/op
+    Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
+    Cancel Time: 17 ms → 5.88235e+07 ops/sec | 17 ns/op
 
-🚀 Benchmarking OrderBook with 1000000 orders
+Benchmarking OrderBook with 1000000 orders
 OpenAddressingHashMap initialized 
-    🟢 Insert Time: 29 ms → 3.44828e+07 ops/sec | 29 ns/op
-    🟡 Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
-    🔴 Cancel Time: 16 ms → 6.25e+07 ops/sec.   | 16 ns/op
+    Insert Time: 29 ms → 3.44828e+07 ops/sec | 29 ns/op
+    Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
+    Cancel Time: 16 ms → 6.25e+07 ops/sec.   | 16 ns/op
 
-🚀 Benchmarking OrderBook with 1000000 orders
+Benchmarking OrderBook with 1000000 orders
 STLHashMap initialized 
-    🟢 Insert Time: 42 ms → 2.38095e+07 ops/sec | 42 ns/op
-    🟡 Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
-    🔴 Cancel Time: 28 ms → 3.57143e+07 ops/sec | 28 ns/op
+    Insert Time: 42 ms → 2.38095e+07 ops/sec | 42 ns/op
+    Update Time: 19 ms → 5.26316e+07 ops/sec | 19 ns/op
+    Cancel Time: 28 ms → 3.57143e+07 ops/sec | 28 ns/op
 */

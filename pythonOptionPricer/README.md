@@ -6,7 +6,7 @@ In addition, it calculates the Greek `Values`, `Delta`, `Gamma`, `Vega`, `Theta`
 
 ## Idea
 
-Use Warwick `CS139 - Web Development Technologies techniques` to host a web server using flask and plot the heatmap through javascript (using Plotly).
+Use Warwick `CS139 - Web Development Technologies` techniques to host a web server using flask and plot the heatmap through javascript (using Plotly).
 
 ## Getting Started
 
