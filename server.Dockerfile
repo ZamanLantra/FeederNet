@@ -5,11 +5,34 @@ RUN apt update && apt install -y \
     cmake \
     g++ \
     libboost-all-dev \
+    libpq-dev \
     wget \
     unzip \
-    gdb \
+    pkg-config \
     vim \
+    git \
     net-tools iproute2 iputils-ping
+
+# RUN apt update && apt install -y \
+#     build-essential \
+#     cmake \
+#     g++
+# RUN apt update && apt install -y \
+#     libboost-all-dev \
+#     libpq-dev \
+#     wget \
+#     unzip
+# RUN apt update && apt install -y \
+#     pkg-config \
+#     vim \
+#     git
+# RUN apt update && apt install -y \
+#     net-tools iproute2 iputils-ping
+
+WORKDIR /opt
+RUN git clone --branch 7.10.1 https://github.com/jtv/libpqxx.git
+WORKDIR /opt/libpqxx
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --target install -j4
 
 WORKDIR /app
 COPY . .

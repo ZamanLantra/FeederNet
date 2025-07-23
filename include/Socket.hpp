@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <utility>
 #include <iostream>
+#include <netdb.h>
+#include <cstring>
 
 class Socket {
 public:
@@ -43,3 +45,25 @@ private:
     int sockfd_{-1};
 };
 
+namespace utils {
+
+std::string resolveDockerIP(const std::string hostname = "my-server") {
+    addrinfo hints{}, *res;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int status = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
+    if (status != 0 || !res)
+        throw std::runtime_error("getaddrinfo failed: " + std::string(gai_strerror(status)));
+
+    char ipStr[INET_ADDRSTRLEN];
+    auto* ipv4 = reinterpret_cast<sockaddr_in*>(res->ai_addr);
+    inet_ntop(AF_INET, &ipv4->sin_addr, ipStr, sizeof(ipStr));
+
+    freeaddrinfo(res);
+
+    std::cout << "Resolved IP for " << hostname << ": " << ipStr << std::endl;
+    return std::string(ipStr);
+}
+
+} // namespace utils

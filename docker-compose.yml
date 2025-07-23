@@ -1,4 +1,43 @@
+
 services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    container_name: timescaledb
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: trade
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - timescale_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - net
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
   server:
     image: my-server
     pull_policy: never
@@ -10,13 +49,14 @@ services:
       - net
     expose:
       - "8084"
-  
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
   client:
     image: my-client
     pull_policy: never
     container_name: my-client
-    depends_on:
-      - server
     build: 
       context: .
       dockerfile: client.Dockerfile
@@ -24,6 +64,15 @@ services:
       - net
     volumes:
       - ./logs:/app/build/test/logs
+    depends_on:
+      server:
+        condition: service_started
+      timescaledb:
+        condition: service_healthy
 
+volumes:
+  timescale_data:
+  pgadmin_data:
+  
 networks:
   net:

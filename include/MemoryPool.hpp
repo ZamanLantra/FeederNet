@@ -10,7 +10,7 @@
 
 namespace Const {
 #ifndef POOL_MSG_COUNT
-    constexpr size_t poolMsgCount = 1 << 18; // 256K - Default message count in the pool
+    constexpr size_t poolMsgCount = 1 << 20; // 1M - Default message count in the pool
 #else
     constexpr size_t poolMsgCount = POOL_MSG_COUNT; // Use user-defined bucket count
 #endif

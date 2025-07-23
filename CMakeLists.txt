@@ -9,4 +9,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(PQXX REQUIRED libpqxx)
+
 add_subdirectory(test)

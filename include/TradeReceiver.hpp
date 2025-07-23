@@ -50,7 +50,12 @@ public:
         sockaddr_in addr{};
         addr.sin_family = AF_INET;
         addr.sin_port = htons(Config::recoveryPort);
-        if (inet_pton(AF_INET, Config::recoveryIP.c_str(), &addr.sin_addr) < 0) 
+#ifdef DOCKER
+        const std::string ip = utils::resolveDockerIP();
+#else
+        const std::string& ip = Config::recoveryIP;
+#endif
+        if (inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) < 0) 
             throw std::runtime_error("Failed to create inet_pton at TradeRecoveryManager");
 
         int connectStatus = -1;

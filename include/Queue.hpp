@@ -13,7 +13,7 @@
 
 namespace Const {
 #ifndef QUEUE_CAPACITY
-    constexpr size_t queueCapacity = 1 << 10; // 1024 - Default queue capacity
+    constexpr size_t queueCapacity = 1 << 20; // 1M - Default queue capacity
 #else
     constexpr size_t queueCapacity = QUEUE_CAPACITY; // Use user-defined capacity
 #endif
@@ -203,7 +203,7 @@ public:
     }
 private:
     boost::lockfree::queue<T, 
-        boost::lockfree::capacity<Const::queueCapacity>, 
+        boost::lockfree::capacity<1024>, 
         boost::lockfree::fixed_sized<true>> queue_;
 };
 

@@ -69,6 +69,9 @@ docker compose build
 docker compose up
 ```
 
+**Note:** Avoid adding sensitive data like passwords in the `docker-compose.yml` file,
+although currently they are added as this is an educational project.
+
 ## Contact
 
 For questions, open an issue or contact [ZamanLantra](https://github.com/ZamanLantra).
