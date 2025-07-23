@@ -30,6 +30,8 @@ The project aims to provide a robust, scalable, and flexible framework for inges
 
 ### Quick Start
 
+**Note:** Since the code is written targeting Linux, it will not run on other systems. Therefore, please use the provided Dockerfile.
+
 Clone the repository:
 ```bash
   git clone https://github.com/ZamanLantra/FeederNet.git
@@ -52,8 +54,8 @@ Run the tests:
 
 Example,
 ```bash
-  wget https://data.binance.vision/data/spot/daily/trades/ETHUSDC/ETHUSDC-trades-2025-06-22.zip
-  unzip ETHUSDC-trades-2025-06-22.zip
+  wget https://data.binance.vision/data/spot/daily/trades/ETHUSDC/ETHUSDC-trades-2025-06-20.zip
+  unzip ETHUSDC-trades-2025-06-20.zip
 ```
 Then, update the `tradeFilePath` in the `test/RunTradeReceiver.cpp` file accordingly.
 

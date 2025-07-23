@@ -2,7 +2,7 @@
 
 #include "TradeServer.hpp"
 
-const std::string tradeFilePath = "../YahooFinance/ETHUSDC-trades-2025-06-20.csv";
+const std::string tradeFilePath = "../../ETHUSDC-trades-2025-06-20.csv";
 
 /**************************************************************************/
 int main() {

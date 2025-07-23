@@ -178,7 +178,8 @@ public:
                 logger_.log("TradeDataSequencer received msg %llu\n", msg->sequence_number);
             sendQueue_.enqueue(msg);
             ++nextSequence_;
-        }    
+        }  
+        logger_.log("TradeDataSequencer stop @run\n");  
     }
 
     void setSequenceNum(uint64_t sequence) { nextSequence_ = (sequence + 1); }
@@ -219,6 +220,7 @@ public:
     void stop() {
         logger_.log("MulticastTradeDataReceiver stop called\n");
         runFlag_.store(false, std::memory_order_relaxed);
+        ::shutdown(socketFD_.get(), SHUT_RDWR); // Unblock the blocking recv() call
     }
     void connect() {
         if constexpr (Config::debug) logger_.log("connect MulticastTradeDataReceiver\n");
@@ -269,6 +271,7 @@ public:
             queue_.enqueue(msg);
             //if constexpr (Config::debug) logger_.log("MC received msg %llu\n", msg->sequence_number);
         }
+        logger_.log("stopped MulticastTradeDataReceiver @run\n");
     }
 private:
     SendMsgQueue& queue_;
