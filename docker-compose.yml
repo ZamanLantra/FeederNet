@@ -1,0 +1,29 @@
+services:
+  server:
+    image: my-server
+    pull_policy: never
+    container_name: my-server
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    networks:
+      - net
+    expose:
+      - "8084"
+  
+  client:
+    image: my-client
+    pull_policy: never
+    container_name: my-client
+    depends_on:
+      - server
+    build: 
+      context: .
+      dockerfile: client.Dockerfile
+    networks:
+      - net
+    volumes:
+      - ./logs:/app/build/test/logs
+
+networks:
+  net:

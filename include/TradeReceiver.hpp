@@ -15,8 +15,12 @@ namespace Config {
     constexpr std::string multicastIP = "239.255.0.1";
     constexpr int multicastPort = 30001;
 
+#ifdef DOCKER
+    constexpr std::string recoveryIP = "172.18.0.2";
+#else
     constexpr std::string recoveryIP = "127.0.0.1";
-    constexpr int recoveryPort = 8080;
+#endif
+    constexpr int recoveryPort = 8084;
     constexpr int maxSnapshotEvents = 100;
     constexpr int recoveryConnectionAttempts = 50;
 };

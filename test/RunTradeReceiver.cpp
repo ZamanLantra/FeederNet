@@ -4,7 +4,7 @@
 
 /**************************************************************************/
 void runMarketDataReceiverToSequencerPipeline() {
-    std::ofstream file("log_TradeReceiver.txt"); 
+    std::ofstream file("logs/log_TradeReceiver.txt"); 
     AsyncLogger logger(file); // Can use std::cout instead of file
 
     logger.log("runMarketDataReceiverToSequencerPipeline Start\n");

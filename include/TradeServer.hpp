@@ -19,8 +19,12 @@ namespace Config {
     constexpr int multicastThrottle_us = 0;
     constexpr bool createMulticastGap = false;
 
+#ifdef DOCKER
+    constexpr std::string snapshotIP = "172.18.0.2";
+#else
     constexpr std::string snapshotIP = "127.0.0.1";
-    constexpr int snapshotPort = 8080;
+#endif
+    constexpr int snapshotPort = 8084;
     constexpr int maxSnapshotEvents = 100;
 };
 
@@ -121,7 +125,7 @@ private:
         address.sin_family = AF_INET;
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons(Config::snapshotPort);
-        inet_pton(AF_INET, Config::snapshotIP.c_str(), &address.sin_addr);
+        // inet_pton(AF_INET, Config::snapshotIP.c_str(), &address.sin_addr);
 
         if (bind(serverFD_.get(), reinterpret_cast<sockaddr*>(&address), sizeof(address)) < 0)
             throw std::runtime_error("bind SnapshotServer failed");
@@ -200,7 +204,7 @@ private:
     }
 
     void serveGapRequest(GapRequestMsgPtr msg, int fd) {
-        std::cout << "serveGapRequest start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
+        std::cerr << "serveGapRequest start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
         if (msg->start_seq > msg->end_seq || msg->start_seq < 0 || msg->end_seq >= tradeMsgStore_.size()) {
             std::cerr << "Requested invalid gap start:" << msg->start_seq << " end:" << msg->end_seq 
                 << " store size:" << tradeMsgStore_.size() << "\n";
@@ -211,7 +215,7 @@ private:
     }
 
     void replayAll(GapRequestMsgPtr msg, int fd) {
-        std::cout << "replayAll start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
+        std::cerr << "replayAll start:" << msg->start_seq << " end:" << msg->end_seq << "\n";
         for (int i = 0; i < tradeMsgStore_.size(); ++i) {
             send(fd, (void*)tradeMsgStore_.get(i), ITCHTradeMsgSize, 0);
         }

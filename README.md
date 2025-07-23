@@ -30,7 +30,7 @@ The project aims to provide a robust, scalable, and flexible framework for inges
 
 ### Quick Start
 
-**Note:** Since the code is written targeting Linux, it will not run on other systems. Therefore, please use the provided Dockerfile.
+**Note:** Since the code is written targeting Linux, it will not run on other systems. Therefore, please use the provided docker-compose file. Run commands below.
 
 Clone the repository:
 ```bash
@@ -58,6 +58,16 @@ Example,
   unzip ETHUSDC-trades-2025-06-20.zip
 ```
 Then, update the `tradeFilePath` in the `test/RunTradeReceiver.cpp` file accordingly.
+
+### Using Docker Compose File to run Trade Server and Receiver
+
+The `docker-compose.yml` file creates two separate Ubuntu-based containers, running the server and client in each respectively. 
+The client's log file is exposed to the host system, and a folder named logs will be created in the same repository directory.
+
+```
+docker compose build
+docker compose up
+```
 
 ## Contact
 
