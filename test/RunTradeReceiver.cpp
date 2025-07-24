@@ -13,7 +13,7 @@ using TradeDataSequencerT = TradeDataSequencer<ITCHTradeMsg, TradeReceiverToSequ
                                         SequencerToDownstreamQ, MsgPool>;
 using MulticastTradeDataReceiverT = MulticastTradeDataReceiver<ITCHTradeMsg, 
                                         TradeReceiverToSequencerQ, MsgPool>;
-using DBManagerT = DBManager<ITCHTradeMsg, TradeReceiverToSequencerQ, MsgPool>;
+using DBManagerT = DBManager<ITCHTradeMsg, SequencerToDownstreamQ, MsgPool>;
 
 /**************************************************************************/
 void runMarketDataReceiverToSequencerPipeline() {
@@ -42,7 +42,8 @@ void runMarketDataReceiverToSequencerPipeline() {
         threads.emplace_back(&TradeDataSequencerT::run, &tradeSequencer);
         threads.emplace_back(&MulticastTradeDataReceiverT::run, &multicastTradeReceiver);
         threads.emplace_back(&DBManagerT::run, &dbManager);
-    } catch (const std::exception& ex) {
+    } 
+    catch (const std::exception& ex) {
         std::cerr << "Exception in Spawning Threads: " << ex.what() << "\n";
     }
 

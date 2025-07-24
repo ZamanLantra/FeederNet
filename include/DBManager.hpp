@@ -7,7 +7,16 @@
 #include "AsyncLogger.hpp"
 #include "Messages.hpp"
 
-template <typename TradeMsg, MyQ RecvMsgQueue, MyPool Pool>
+namespace Const {
+#ifndef DB_BATCH_SIZE
+    constexpr std::size_t commitBatchSize = 1000;
+#else
+    constexpr size_t commitBatchSize = DB_BATCH_SIZE; // Use user-defined capacity
+#endif
+};
+
+/**************************************************************************/
+template <typename TradeMsg, MyQ RecvMsgQueue, MyPool Pool, bool DESTROY_MESSAGES = true>
 class DBManager {
 public:
     using TradeMsgPtr = TradeMsg*;
@@ -40,7 +49,13 @@ public:
         }
     }
     void run() {
-        logger_.log("DBManager run\n");
+        // runSingle();
+        // runBatch();
+        runCopy();
+    }
+private:
+    void runSingle() {
+        logger_.log("DBManager SINGLE run\n");
         try {
             while (runFlag_.load(std::memory_order_relaxed)) {
                 TradeMsgPtr msg = recvQueue_.dequeue();
@@ -48,20 +63,20 @@ public:
                     std::this_thread::yield();
                     continue;
                 }
-                commit(msg);
-                msgPool_.deallocate(msg);
+                commitSingle(msg);
+                if constexpr (DESTROY_MESSAGES) {
+                    msgPool_.deallocate(msg);
+                } 
             }
         } 
         catch (const std::exception& e) {
             std::cerr << "DBManager run() error: " << e.what() << std::endl;
         }
     }
-
-private:
-    void commit(const TradeMsgPtr msg) {
+    void commitSingle(const TradeMsgPtr msg) {
         try {
             pqxx::work txn(*conn_);
-            std::time_t db_time = std::time(nullptr);
+            // std::time_t db_time = std::time(nullptr);
 
             txn.exec(
                 pqxx::prepped{"insert_trade"},
@@ -74,13 +89,150 @@ private:
                     msg->quantity,
                     msg->buyer_is_maker,
                     msg->best_match,
-                    db_time
+                    static_cast<const char*>(nullptr) // db_time
                 }
             );
 
             txn.commit();
         } 
         catch (const std::exception& e) {
+            std::cerr << "DBManager commit() error: " << e.what() << std::endl;
+        }
+    }
+
+    void runBatch() {
+        logger_.log("DBManager run BATCH\n");
+        std::vector<TradeMsgPtr> batch;
+        batch.reserve(Const::commitBatchSize);
+
+        try {
+            while (runFlag_.load(std::memory_order_relaxed)) {
+                TradeMsgPtr msg = recvQueue_.dequeue();
+                if (!msg) {
+                    std::this_thread::yield();
+                    continue;
+                }
+
+                batch.emplace_back(msg);
+
+                if (batch.size() >= Const::commitBatchSize) {
+                    commitBatch(batch);
+                    if constexpr (DESTROY_MESSAGES) {
+                        for (auto m : batch) 
+                            msgPool_.deallocate(m);
+                    }
+                    batch.clear();
+                }
+            }
+
+            if (!batch.empty()) {
+                logger_.log("DBManager flush remaining BATCH\n");
+                commitBatch(batch);
+                if constexpr (DESTROY_MESSAGES) {
+                    for (auto m : batch) 
+                        msgPool_.deallocate(m);
+                }
+            }
+        } 
+        catch (const std::exception& e) {
+            std::cerr << "DBManager run() error: " << e.what() << std::endl;
+        }
+    }
+    void commitBatch(const std::vector<TradeMsgPtr>& batch) {
+        try {
+            pqxx::work txn(*conn_);
+            // std::time_t db_time = std::time(nullptr);
+
+            for (const auto& msg : batch) {
+                txn.exec(
+                    pqxx::prepped{"insert_trade"},
+                    pqxx::params{
+                        std::string(1, msg->message_type),
+                        msg->sequence_number,
+                        msg->trade_id,
+                        msg->timestamp,
+                        msg->price,
+                        msg->quantity,
+                        msg->buyer_is_maker,
+                        msg->best_match,
+                        static_cast<const char*>(nullptr) // db_time
+                    }
+                );
+            }
+
+            txn.commit();
+        } catch (const std::exception& e) {
+            std::cerr << "DBManager commit() error: " << e.what() << std::endl;
+        }
+    }
+
+    void runCopy() {
+        logger_.log("DBManager run COPY\n");
+        std::vector<TradeMsgPtr> batch;
+        batch.reserve(Const::commitBatchSize);
+
+        try {
+            while (runFlag_.load(std::memory_order_relaxed)) {
+                TradeMsgPtr msg = recvQueue_.dequeue();
+                if (!msg) {
+                    std::this_thread::yield();
+                    continue;
+                }
+
+                batch.emplace_back(msg);
+
+                if (batch.size() >= Const::commitBatchSize) {
+                    commitCopy(batch);
+                    if constexpr (DESTROY_MESSAGES) {
+                        for (auto m : batch) 
+                            msgPool_.deallocate(m);
+                    }
+                    batch.clear();
+                }
+            }
+
+            if (!batch.empty()) {
+                logger_.log("DBManager flush remaining BATCH\n");
+                commitCopy(batch);
+                if constexpr (DESTROY_MESSAGES) {
+                    for (auto m : batch) 
+                        msgPool_.deallocate(m);
+                }
+            }
+        } 
+        catch (const std::exception& e) {
+            std::cerr << "DBManager run() error: " << e.what() << std::endl;
+        }
+    }
+    void commitCopy(const std::vector<TradeMsgPtr>& batch) {
+        try {
+            pqxx::work txn(*conn_);
+            std::time_t db_time = std::time(nullptr);
+
+            // std::time_t raw_time = std::time(nullptr);
+            // std::tm* timeinfo = std::gmtime(&raw_time);
+            // char buffer[32];
+            // std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+            auto stream = pqxx::stream_to::table(txn, { "trades" });
+
+            for (const auto& msg : batch) {
+                stream.write_row(std::make_tuple(
+                    std::string(1, msg->message_type),
+                    msg->sequence_number,
+                    msg->trade_id,
+                    msg->timestamp,
+                    msg->price,
+                    msg->quantity,
+                    msg->buyer_is_maker,
+                    msg->best_match,
+                    static_cast<const char*>(nullptr) // buffer
+                ));
+            }
+
+            stream.complete();
+            txn.commit();
+        } catch (const std::exception& e) {
             std::cerr << "DBManager commit() error: " << e.what() << std::endl;
         }
     }

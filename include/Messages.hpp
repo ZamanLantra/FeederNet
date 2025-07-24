@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #pragma pack(push,1)
 struct ITCHTradeMsg {
     char message_type;          // 'P' for trade message
