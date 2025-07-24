@@ -7,5 +7,5 @@ CREATE TABLE trades (
     quantity DOUBLE PRECISION,
     buyer_is_maker BOOLEAN,
     best_match BOOLEAN,
-    db_time TIMESTAMP
+    db_time TIMESTAMP NULL
 );

@@ -4,9 +4,9 @@
         -L/opt/homebrew/Cellar/boost/1.88.0/lib -L/opt/homebrew/Cellar/libpqxx/7.10.1/lib -lpqxx
 */
 
-#include "Messages.hpp"
 #include "DBManager.hpp"
 #include "Utils.hpp"
+#include "Messages.hpp"
 
 const std::string connStr = "dbname=trades user=postgres password=postgres host=localhost port=5432";
 // const std::string tradeFilePath = "../../ETHUSDC-trades-2025-06-20.csv";
@@ -87,6 +87,9 @@ CREATE TABLE trades (
     best_match BOOLEAN,
     db_time TIMESTAMP
 );
+
+trades=# select count(*) from trades;
+trades=# truncate table trades;
 
 Within 2 seconds -> BATCH_SIZE = 1,000
     COPY - 398,870 (ALL) | within 1 sec -> 246,000

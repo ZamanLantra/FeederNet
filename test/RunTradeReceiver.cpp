@@ -47,7 +47,7 @@ void runMarketDataReceiverToSequencerPipeline() {
         std::cerr << "Exception in Spawning Threads: " << ex.what() << "\n";
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(120));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
     logger.log("Stopping Threads for TradeDataSequencer and MulticastTradeDataReceiver\n");
     tradeSequencer.stop();
     multicastTradeReceiver.stop();

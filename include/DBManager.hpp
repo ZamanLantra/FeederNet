@@ -109,7 +109,17 @@ private:
             while (runFlag_.load(std::memory_order_relaxed)) {
                 TradeMsgPtr msg = recvQueue_.dequeue();
                 if (!msg) {
-                    std::this_thread::yield();
+                    if (!batch.empty()) {
+                        commitBatch(batch);
+                        if constexpr (DESTROY_MESSAGES) {
+                            for (auto m : batch) 
+                                msgPool_.deallocate(m);
+                        }
+                        batch.clear();
+                    }
+                    else {
+                        std::this_thread::yield();
+                    }
                     continue;
                 }
 
@@ -175,7 +185,17 @@ private:
             while (runFlag_.load(std::memory_order_relaxed)) {
                 TradeMsgPtr msg = recvQueue_.dequeue();
                 if (!msg) {
-                    std::this_thread::yield();
+                    if (!batch.empty()) {
+                        commitCopy(batch);
+                        if constexpr (DESTROY_MESSAGES) {
+                            for (auto m : batch) 
+                                msgPool_.deallocate(m);
+                        }
+                        batch.clear();
+                    }
+                    else {
+                        std::this_thread::yield();
+                    }
                     continue;
                 }
 
