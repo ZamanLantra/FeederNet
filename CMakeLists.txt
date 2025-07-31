@@ -12,4 +12,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PQXX REQUIRED libpqxx)
 
+pkg_check_modules(PC_ZMQ REQUIRED libzmq)
+
 add_subdirectory(test)

@@ -11,6 +11,7 @@ RUN apt update && apt install -y \
     pkg-config \
     vim \
     git \
+    libzmq3-dev \
     net-tools iproute2 iputils-ping
 
 # RUN apt update && apt install -y \
@@ -37,9 +38,10 @@ RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --targ
 WORKDIR /app
 COPY . .
 
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release . -DCMAKE_CXX_FLAGS_RELEASE="-g -DPOOL_MSG_COUNT=1000000 -DDOCKER" && cmake --build build -j4
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release . -DCMAKE_CXX_FLAGS_RELEASE="-g -DPOOL_MSG_COUNT=1500000 -DDOCKER" && cmake --build build -j4
 
-RUN wget https://data.binance.vision/data/spot/daily/trades/ETHUSDC/ETHUSDC-trades-2025-06-20.zip && unzip ETHUSDC-trades-2025-06-20.zip && rm ETHUSDC-trades-2025-06-20.zip
+# RUN wget https://data.binance.vision/data/spot/daily/trades/ETHUSDC/ETHUSDC-trades-2025-06-20.zip && unzip ETHUSDC-trades-2025-06-20.zip && rm ETHUSDC-trades-2025-06-20.zip
+RUN cd tradefiles && ./run.sh && rm -r *.zip && cd ..
 
 WORKDIR /app/build/test
 

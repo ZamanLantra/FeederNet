@@ -39,8 +39,8 @@ public:
             }
             conn_->prepare("insert_trade",
                 "INSERT INTO trades "
-                "(message_type, sequence_number, trade_id, timestamp, price, quantity, buyer_is_maker, best_match, db_time) "
-                "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, to_timestamp($9))");
+                "(message_type, sequence_number, trade_id, timestamp, price, quantity, buyer_is_maker, best_match, symbol) "
+                "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
             logger_.log("DBManager: Connected to DB\n");
         } 
         catch (const std::exception& e) {
@@ -89,7 +89,7 @@ private:
                     msg->quantity,
                     msg->buyer_is_maker,
                     msg->best_match,
-                    static_cast<const char*>(nullptr) // db_time
+                    std::string(msg->symbol)
                 }
             );
 
@@ -165,7 +165,7 @@ private:
                         msg->quantity,
                         msg->buyer_is_maker,
                         msg->best_match,
-                        static_cast<const char*>(nullptr) // db_time
+                        std::string(msg->symbol)
                     }
                 );
             }
@@ -246,7 +246,7 @@ private:
                     msg->quantity,
                     msg->buyer_is_maker,
                     msg->best_match,
-                    static_cast<const char*>(nullptr) // buffer
+                    std::string(msg->symbol)
                 ));
             }
 

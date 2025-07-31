@@ -11,6 +11,7 @@ RUN apt update && apt install -y \
     pkg-config \
     vim \
     git \
+    libzmq3-dev \
     net-tools iproute2 iputils-ping
 
 WORKDIR /opt
@@ -21,7 +22,7 @@ RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --targ
 WORKDIR /app
 COPY . .
 
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release . -DCMAKE_CXX_FLAGS_RELEASE="-g -DPOOL_MSG_COUNT=1000000 -DDOCKER" && cmake --build build -j4
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release . -DCMAKE_CXX_FLAGS_RELEASE="-g -DPOOL_MSG_COUNT=1500000 -DDOCKER" && cmake --build build -j4
 
 WORKDIR /app/build/test
 

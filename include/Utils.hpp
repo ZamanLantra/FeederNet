@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <fstream>
+#include <filesystem>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -9,29 +10,55 @@
 #include <chrono>
 #include "Messages.hpp"
 
+namespace fs = std::filesystem;
+
 /**************************************************************************/
 class TradeMsgStore {
 public:
-    TradeMsgStore(const std::string& fileName) {
-        std::cout << "TradeMsgStore start\n";
-        std::ifstream file(fileName);
+    TradeMsgStore(const std::string& fileName, const std::string& path) {
+        ReadFile(fileName, path);
+    }
+    TradeMsgStore(const std::string& dirPath) {
+        std::cout << "TradeMsgStore reading directory: " << dirPath << "\n";
+        for (const auto& entry : fs::directory_iterator(dirPath)) {
+            if (!entry.is_regular_file())
+                continue;
+            std::string fileName = entry.path().filename().string();
+            if (fileName.ends_with(".csv")) {
+                ReadFile(fileName, fs::path(dirPath));
+            }
+        }
+        std::sort(store_.begin(), store_.end(), 
+            [](auto& m1, auto& m2) { return m1.timestamp < m2.timestamp; });    
+        for (uint64_t i = 0; i < size(); ++i) {
+            store_[i].sequence_number = i;
+        }
+        std::cout << "TradeMsgStore loaded total " << size() << " trades\n";
+    }
+    ITCHTradeMsgPtr get(size_t index) {
+        if (index >= store_.size()) 
+            return nullptr;
+        return &(store_[index]);
+    }
+    size_t size() const { return store_.size(); }
+private:
+    void ReadFile(const std::string& fileName, const std::string& path = "") {
+        std::ifstream file(fs::path(path) / fileName);
         if (!file)
             throw std::runtime_error("Trade file open failed");
         std::string line { "" };
-        std::cout << "TradeMsgStore file openned\n";
+
+        size_t pos = fileName.find('-');
+        std::string symbol = (pos != std::string::npos) ? fileName.substr(0, pos) : fileName;
+        size_t count {};
 
         while (std::getline(file, line)) {
-            parseTrade(line);
+            parseTrade(line, symbol);
+            ++count;
         }
-        std::cout << "TradeMsgStore loaded " << size() << " trades from " << fileName << " file\n"; 
+        std::cout << "TradeMsgStore loaded " << count << " trades of symbol " << symbol << 
+                    " from " << fileName << " file\n"; 
     }
-    ITCHTradeMsgPtr get(size_t index) {
-        if (index >= vec_.size()) 
-            return nullptr;
-        return &(vec_[index]);
-    }
-    size_t size() const { return vec_.size(); }
-private:
     /*
     | Field Index | Possible Meaning        | Description                                 |
     | ----------- | ----------------------- | ------------------------------------------- |
@@ -43,10 +70,10 @@ private:
     | 5           | Is Buyer Maker (bool)   | True if buyer is maker (passive order)      |
     | 6           | Is Best Match (bool)    | True if this trade is the best price match? |
     */
-    void parseTrade(std::string& line) {
+    void parseTrade(std::string& line, const std::string& symbol) {
         ITCHTradeMsg msg {};
         msg.message_type = 'P';
-        msg.sequence_number = vec_.size();
+        msg.sequence_number = store_.size();
         
         std::istringstream ss(line);
         std::string token {};
@@ -71,7 +98,9 @@ private:
         std::getline(ss, token, ',');
         msg.best_match = (token == "True");
 
-        vec_.emplace_back(msg);
+        std::memcpy(msg.symbol, symbol.data(), std::min(symbol.size(), sizeof(msg.symbol)));
+
+        store_.emplace_back(msg);
     }
-    std::vector<ITCHTradeMsg> vec_;
+    std::vector<ITCHTradeMsg> store_;
 };

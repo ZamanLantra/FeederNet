@@ -1,6 +1,5 @@
 FROM ubuntu:24.04
 
-# Don't prompt for timezone, locale, etc.
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y \

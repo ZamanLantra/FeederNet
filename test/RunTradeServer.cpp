@@ -2,10 +2,14 @@
 
 #include "TradeServer.hpp"
 
-const std::string tradeFilePath = "../../ETHUSDC-trades-2025-06-20.csv";
+// const std::string path = "../../";
+// const std::string tradeFile = "ETHUSDC-trades-2025-06-20.csv";
+
+const std::string path = "../../tradefiles";
 
 /**************************************************************************/
 int main() {
-    TradeServer tradeServer(tradeFilePath, true);
+    // TradeServer tradeServer(tradeFile, path, true);
+    TradeServer tradeServer(path, true);
     tradeServer.run();
 }

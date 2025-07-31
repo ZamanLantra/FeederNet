@@ -2,6 +2,8 @@
     g++ -std=c++20 -O3 -g TestDBManager.cpp -o TestDBManager \
         -I../include -I/opt/homebrew/Cellar/libpqxx/7.10.1/include -I/opt/homebrew/Cellar/boost/1.88.0/include \
         -L/opt/homebrew/Cellar/boost/1.88.0/lib -L/opt/homebrew/Cellar/libpqxx/7.10.1/lib -lpqxx
+
+    g++ -std=c++20 -O3 -g -I../include TestDBManager.cpp -o TestDBManager -lpqxx
 */
 
 #include "DBManager.hpp"
@@ -9,8 +11,8 @@
 #include "Messages.hpp"
 
 const std::string connStr = "dbname=trades user=postgres password=postgres host=localhost port=5432";
-// const std::string tradeFilePath = "../../ETHUSDC-trades-2025-06-20.csv";
-const std::string tradeFilePath = "../ETHUSDC-trades-2025-06-20.csv";
+const std::string path = "../";
+const std::string tradeFile = "ETHUSDC-trades-2025-06-20.csv";
 
 using Pool = LockFreeThreadSafePool<ITCHTradeMsg, true>;
 using MyQq = CustomSPSCLockFreeQueue<ITCHTradeMsg*>; // can use CustomMPMCLockFreeQueue as well
@@ -20,7 +22,7 @@ using DBManagerT = DBManager<ITCHTradeMsg, MyQq, Pool, false>;
 void sendTradesToDBManager(MyQq& q, AsyncLogger& logger) {
     logger.log("sendTradesToDBManager start\n");
     
-    TradeMsgStore tradeMsgStore(tradeFilePath);
+    TradeMsgStore tradeMsgStore(tradeFile, path);
     const size_t msgCount = tradeMsgStore.size();
     logger.log("TradeMsgStore loaded [%zu]\n", msgCount);
 

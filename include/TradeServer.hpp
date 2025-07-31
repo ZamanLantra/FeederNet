@@ -210,8 +210,15 @@ private:
 /**************************************************************************/
 class TradeServer {
 public:
-    TradeServer(const std::string& tradeFile, bool needSnapshotServer) 
-            : tradeMsgStore_(tradeFile)
+    TradeServer(const std::string& tradeFile, const std::string& path, bool needSnapshotServer) 
+            : tradeMsgStore_(tradeFile, path)
+            , snapshotServer_(tradeMsgStore_)
+            , multicastServer_(tradeMsgStore_)
+            , needSnapshotServer_(needSnapshotServer) {
+
+    }
+    TradeServer(const std::string& path, bool needSnapshotServer) 
+            : tradeMsgStore_(path)
             , snapshotServer_(tradeMsgStore_)
             , multicastServer_(tradeMsgStore_)
             , needSnapshotServer_(needSnapshotServer) {

@@ -15,5 +15,8 @@ foreach(test_src ${TEST_SOURCES})
     target_link_directories(${test_name} PRIVATE ${PQXX_LIBRARY_DIRS})
     target_link_libraries(${test_name} PRIVATE ${PQXX_LIBRARIES} pq pthread)
 
+    target_include_directories(${test_name} PRIVATE ${PC_ZMQ_INCLUDE_DIRS})
+    target_link_libraries(${test_name} PRIVATE ${PC_ZMQ_LIBRARIES})
+
     add_test(NAME ${test_name} COMMAND ${test_name})
 endforeach()

@@ -69,6 +69,11 @@ docker compose build
 docker compose up
 ```
 
+### Log to postgres database to check
+```
+docker exec -it timescaledb psql -U postgres -d trades
+```
+
 **Note:** Avoid adding sensitive data like passwords in the `docker-compose.yml` file,
 although currently they are added as this is an educational project.
 

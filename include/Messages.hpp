@@ -12,6 +12,7 @@ struct ITCHTradeMsg {
     double quantity;            // trade quantity
     bool buyer_is_maker;        // flags
     bool best_match;            // flags
+    char symbol[8] = {};
 };
 
 struct GapRequestMsg {
